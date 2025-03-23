@@ -8,7 +8,6 @@ def sigmoid(x):
 def sigmoid_derivative(x):
     return x * (1 - x)
 
-# Xây dựng mạng nơ-ron nhân tạo
 class NeuralNetwork:
     def __init__(self, layers, alpha=0.01):
         self.layers = layers
@@ -65,35 +64,28 @@ class NeuralNetwork:
         loss = -np.mean(y * np.log(y_predict + 1e-12) + (1 - y) * np.log(1 - y_predict + 1e-12))
         return loss
 
-# Xử lý dữ liệu
+
 def main():  
     df = pd.read_csv('WA_Fn-UseC_-HR-Employee-Attrition.csv')  
     
     #df = df.sample(n=1000, random_state=42)
     
-    # Chỉ lấy các cột cần thiết
     features = ['Age', 'TotalWorkingYears', 'Education', 'JobRole', 'Attrition']
     df = df[features]
 
-    # Mã hóa nhãn thất nghiệp
     df['Attrition'] = df['Attrition'].map({'Yes': 1, 'No': 0})
 
-    # Mã hóa cột JobRole (Ngành nghề)
     df = pd.get_dummies(df, columns=['JobRole'], drop_first=True)
 
-    # Chia thành tập đặc trưng (X) và nhãn (y)
     X = df.drop(columns=['Attrition'])
     y = df['Attrition'].values
 
-    # Chuẩn hóa dữ liệu
     scaler = MinMaxScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # Khởi tạo và huấn luyện mô hình
     p = NeuralNetwork([X.shape[1], 10, 1], alpha=0.05)
     p.fit(X_scaled, y, epochs=10000, verbose=100)
 
-    # Nhập dữ liệu từ người dùng
     tuoi = float(input("Nhập tuổi: "))
     kinh_nghiem = float(input("Nhập số năm kinh nghiệm: "))
     trinh_do_hoc_van = int(input("Nhập trình độ học vấn (1: Trung học, 2: Cao đẳng, 3: Đại học, 4: Thạc sĩ, 5: Tiến sĩ): "))
@@ -101,24 +93,19 @@ def main():
                                             "Manager, Healthcare Representative, Human Resources, "
                                             "Technical Degree, Manufacturing Director, Research Director): ")
 
-    # Tạo DataFrame từ dữ liệu nhập vào
     input_data = pd.DataFrame([[tuoi, kinh_nghiem, trinh_do_hoc_van, nganh_nghe]],
                               columns=['Age', 'TotalWorkingYears', 'Education', 'JobRole'])
 
-    # Mã hóa JobRole bằng One-hot Encoding
     input_data = pd.get_dummies(input_data, columns=['JobRole'])
 
-    # Đảm bảo cột của input_data giống với X
     for column in X.columns:
         if column not in input_data.columns:
             input_data[column] = 0
     
     input_data = input_data[X.columns]
 
-    # Chuẩn hóa dữ liệu nhập vào
     input_scaled = scaler.transform(input_data)
 
-    # Dự đoán khả năng thất nghiệp
     xac_suat_that_nghiep = p.predict(input_scaled)
 
     print(f'\nXác suất thất nghiệp: {xac_suat_that_nghiep[0][0] * 100:.2f}%')
